@@ -14,35 +14,25 @@
             font-family: Arial, sans-serif;
             background-color: white;
         }
-		.size{
-		   margin-top: 0px;     /* Pushes the element down */
-           margin-bottom: 0px;   /* Adds space below the element */
-           margin-left: 15px;    /* Pushes the element to the right */
-           margin-right: 8px;
-		   width: 76px;
-           height: 44px;
-		   
-		}
-		.google-searchname{
+        .size {
+            margin: 15px 8px 0 15px;
+            width: 76px;
+            height: 44px;
+        }
+        .google-searchname {
             font-size: 60px;
-		    color: #FF0800;
-			margin-top: 15px;     /* Pushes the element down */
-           margin-bottom: 0px;   /* Adds space below the element */
-           margin-left: 15px;    /* Pushes the element to the right */
-           margin-right: 8px;
-		
-		  }
+            color: #FF0800;
+            margin: 15px 8px 0 15px;
+        }
         .container {
             text-align: center;
-            width: 96vw; /* Makes the width 96% of the viewport width */
-            max-width: 100%; /* Ensures it doesn’t exceed the screen width */
-            height: auto; /* Adjusts height based on content, or */
-            max-height: 90vh; /* Constrains the max height to 90% of the viewport height */
-            padding: auto;
+            width: 96vw;
+            max-width: 100%;
+            max-height: 90vh;
             background-color: #ffffff;
             border-radius: 12px;
             box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.2);
-            overflow: auto; /* Enables scrolling if content overflows */
+            overflow: auto;
         }
         .input-field {
             width: 66%;
@@ -99,8 +89,7 @@
         .pagination {
             display: flex;
             justify-content: center;
-            margin-top: 10px;
-            margin-bottom: 10px;
+            margin: 10px 0;
         }
         .pagination button {
             padding: 5px 10px;
@@ -123,17 +112,16 @@
 <body>
 
 <div class="container">
-    
     <h1 class="google-searchname">
-    <img src="https://static.cdnlogo.com/logos/v/99/veeva.svg" class="size" >Veeva Vault
-	</h1>	 
+        <img src="https://static.cdnlogo.com/logos/v/99/veeva.svg" class="size">Veeva Vault
+    </h1>
     <input type="text" id="search-input" class="input-field" placeholder="Enter search term...">
     <button class="button" onclick="searchDocuments()">Search Documents</button>
     <div id="error-message" class="error-message"></div>
     <div id="document-count" class="document-count"></div>
-   
-    <!-- Table to display the results -->
-    <table class="results-table" id="data-table">
+
+    <!-- Table to display the results, hidden initially -->
+    <table class="results-table" id="data-table" style="display: none;">
         <thead>
             <tr>
                 <th>Document ID</th>
@@ -144,15 +132,14 @@
             </tr>
         </thead>
 		<!-- Pagination controls -->
-    <div id="pagination-top" class="pagination"  ></div>
+         <div id="pagination-top" class="pagination"></div>
         <tbody>
             <!-- Table rows will be inserted dynamically here -->
         </tbody>
     </table>
 
-   
+    
     <div id="pagination-bottom" class="pagination"></div>
-	
 </div>
 
 <script>
@@ -199,11 +186,13 @@
         const query = document.getElementById('search-input').value.trim();
         const errorMessage = document.getElementById('error-message');
         const documentCount = document.getElementById('document-count');
+        const dataTable = document.getElementById('data-table');
 
         if (!query) {
             errorMessage.innerText = 'Please enter a search term.';
             clearTable();
             documentCount.innerText = '';
+            dataTable.style.display = 'none';
             return;
         }
 
@@ -231,18 +220,21 @@
             if (data.size === 0) {
                 documentCount.innerText = 'No documents found';
                 clearTable();
+                dataTable.style.display = 'none';
                 return;
             }
 
             documentsData = data.documents;
             documentCount.innerText = `${data.size} documents found`;
-            currentPage = 1; 
+            currentPage = 1;
+            dataTable.style.display = 'table'; // Show table if there are search results
             renderTable(currentPage);
             renderPagination();
         } catch (error) {
             errorMessage.innerText = error.message;
             clearTable();
             documentCount.innerText = '';
+            dataTable.style.display = 'none';
         }
     }
 
@@ -250,9 +242,9 @@
         const dataTableBody = document.getElementById('data-table').getElementsByTagName('tbody')[0];
         dataTableBody.innerHTML = '';
 
-        const start = (page - 1) * documentsPerPage; // Calculate the starting index for the current page
-        const end = start + documentsPerPage; // Calculate the ending index
-        const paginatedDocuments = documentsData.slice(start, end); // Get the documents for the current page
+        const start = (page - 1) * documentsPerPage;
+        const end = start + documentsPerPage;
+        const paginatedDocuments = documentsData.slice(start, end);
 
         paginatedDocuments.forEach(document => {
             const row = dataTableBody.insertRow();
@@ -270,9 +262,8 @@
         paginationTop.innerHTML = '';
         paginationBottom.innerHTML = '';
 
-        const pageCount = Math.ceil(documentsData.length / documentsPerPage); // Calculate the total number of pages
+        const pageCount = Math.ceil(documentsData.length / documentsPerPage);
 
-        // Previous button
         const prevButton = document.createElement('button');
         prevButton.innerText = 'Previous';
         prevButton.disabled = currentPage === 1;
@@ -287,24 +278,16 @@
         for (let i = 1; i <= pageCount; i++) {
             const button = document.createElement('button');
             button.innerText = i;
-
-            if (i === currentPage) {
-                button.classList.add('active'); // colour
-            }
-
-             // Set up button click event
+            button.className = i === currentPage ? 'active' : '';
             button.onclick = () => {
-                currentPage = i; // Update current page
-                renderTable(currentPage); // Update table for new page
-                renderPagination(); // Refresh pagination buttons
+                currentPage = i;
+                renderTable(currentPage);
+                renderPagination();
             };
-
-            // Append the button to both pagination areas
             paginationTop.appendChild(button);
             paginationBottom.appendChild(button.cloneNode(true));
         }
 
-        // Next button
         const nextButton = document.createElement('button');
         nextButton.innerText = 'Next';
         nextButton.disabled = currentPage === pageCount;
